@@ -1,4 +1,10 @@
 package com.github.springprac.web.dto;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
 public class ItemBody {
 
     private String name;
@@ -6,22 +12,5 @@ public class ItemBody {
     private Integer price;
     private Spec spec;
 
-    public ItemBody() {
-    }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public Spec getSpec() {
-        return spec;
-    }
 }

@@ -17,12 +17,12 @@ public class StoreSalesJdbcTemplateDao implements StoreSalesRepository {
     }
 
     static RowMapper<StoreSales> storeSalesRowMapper = (((rs, rowNum) ->
-            new StoreSales(
-                    rs.getInt("id"),
-                    rs.getNString("store_name"),
-                    rs.getInt("amount")
-            )
-    ));
+            new StoreSales.StoreSalesBuilder()
+                    .id( rs.getInt("id"))
+                    .storeName(rs.getNString("store_name"))
+                    .amount(rs.getInt("amount"))
+                    .build()));
+
 
     @Override
     public StoreSales findStoreSalesById(Integer storeId) {

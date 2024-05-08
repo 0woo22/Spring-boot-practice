@@ -4,9 +4,15 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.github.springprac.respository.airlineTicket.AirlineTicket;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.format.DateTimeFormatter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class) // 티켓정보에서 return_time 이기 때문에 _ 사용위해 해줌
 public class Ticket {
     private String depart;
@@ -14,9 +20,6 @@ public class Ticket {
     private String departureTime;
     private String returnTime;
     private Integer ticketId;
-
-    public Ticket() {
-    }
 
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -28,23 +31,5 @@ public class Ticket {
         this.returnTime = airlineTicket.getReturnAt().format(formatter);
 
     }
-    public String getDepart() {
-        return depart;
-    }
 
-    public String getArrival() {
-        return arrival;
-    }
-
-    public String getDepartureTime() {
-        return departureTime;
-    }
-
-    public String getReturnTime() {
-        return returnTime;
-    }
-
-    public Integer getTicketId() {
-        return ticketId;
-    }
 }
