@@ -5,6 +5,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public class UserJdbcTemplateDao implements UserRepository{
 
@@ -23,7 +25,12 @@ public class UserJdbcTemplateDao implements UserRepository{
             ));
 
     @Override
-    public UserEntity findUserById(Integer userId) {
-        return jdbcTemplate.queryForObject("SELECT * FROM users WHERE user_id = ?", userEntityRowMapper, userId);
+    public Optional<UserEntity> findUserById(Integer userId) {
+        try{
+            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM users WHERE user_id = ?", userEntityRowMapper, userId));
+        }
+        catch (Exception e){ // 문제 발생 시 catch 에서 잡히면 , empty 취급 = null 취급 하겠다는 의미
+            return Optional.empty();
+        }
     }
 }

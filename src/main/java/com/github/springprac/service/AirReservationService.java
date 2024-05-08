@@ -10,6 +10,9 @@ import com.github.springprac.respository.reservations.Reservation;
 import com.github.springprac.respository.reservations.ReservationRepository;
 import com.github.springprac.respository.users.UserEntity;
 import com.github.springprac.respository.users.UserRepository;
+import com.github.springprac.service.exceptions.InvalidValueException;
+import com.github.springprac.service.exceptions.NotAcceptException;
+import com.github.springprac.service.exceptions.NotFoundException;
 import com.github.springprac.service.mapper.TicketMapper;
 import com.github.springprac.web.dto.airline.ReservationRequest;
 import com.github.springprac.web.dto.airline.ReservationResult;
@@ -19,7 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -37,11 +43,20 @@ public class AirReservationService {
         // 1. 유저를 userId 로 가져와서, 선호하는 여행지 도출
         // 2. 선호하는 여행지와 ticketType으로 AirlineTIcket table 질의 해서 필요한 AirlineTicket
         // 3. 이 둘의 정보를 조합해서 Ticket DTO를 만든다.
-        UserEntity userEntity = userRepository.findUserById(userId);
+
+        Set<String> ticketTypeSet = new HashSet<>(Arrays.asList("편도","왕복"));
+        if (!ticketTypeSet.contains(ticketType))
+            throw new InvalidValueException("해당 TicketType " + ticketType + "은 지원하지 않습니다 .");
+
+        UserEntity userEntity = userRepository.findUserById(userId).orElseThrow(
+                () -> new NotFoundException("해당 ID :" + userId + " 유저를 확인할 수 없습니다."));
         String likePlace = userEntity.getLikeTravelPlace();
 
         List<AirlineTicket> airlineTickets
                 = airlineTicketRepository.findAllAirlineTicketsWithPlaceAndTicketType(likePlace, ticketType);
+
+        if (airlineTickets.isEmpty()) // 여기서 문제 있으면 notfoundexception 들어감
+            throw new NotFoundException("해당 like Place : " + likePlace + "와 TicketType : " + ticketType + "에 해당하는 항공권을 찾을 수 없습니다. ");
 
         List<Ticket> tickets = airlineTickets.stream().map(TicketMapper.INSTANCE::airlineTicketToTicket).collect(Collectors.toList());
         return tickets;
@@ -56,18 +71,29 @@ public class AirReservationService {
         Integer airlineTicketId= reservationRequest.getAirlineTicketId();
 
         // 1. Passenger I
-        Passenger passenger = passengerReposiotry.findPassengerByUserId(userId);
+        Passenger passenger = passengerReposiotry.findPassengerByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("요청하신 userId " + userId + "에 해당하는 Passenger를 찾을 수 없습니다 ."));
         Integer passengerId= passenger.getPassengerId();
 
         // 2. price 등의 정보 불러오기
         List<AirlineTicketAndFlightInfo> airlineTicketAndFlightInfos
                 = airlineTicketRepository.findAllAirLineTicketAndFlightInfo(airlineTicketId);
 
+        if (airlineTicketAndFlightInfos.isEmpty()) // 여기서 문제 있으면 notfoundexception 들어감
+            throw new NotFoundException("AirlineTicket Id " + airlineTicketId + "에 해당하는 항공편과 항공권을 찾을 수 없습니다. ");
+
+
+        Boolean isSuccess = false;
         // 3. reservation 생성
         Reservation reservation = new Reservation(passengerId, airlineTicketId);
-        Boolean isSuccess = reservationRepository.saveReservation(reservation);
+        try{
+           isSuccess = reservationRepository.saveReservation(reservation);
+        } catch (RuntimeException e){
+            throw new NotAcceptException("Reservation이 등록되는 과정이 거부되었습니다.");
+        }
 
-        // TODO: ReservationResult DTO 만들기
+
+        // ReservationResult DTO 만들기
         List<Integer> prices = airlineTicketAndFlightInfos.stream().map(AirlineTicketAndFlightInfo::getPrice).collect(Collectors.toList());
         List<Integer> charges = airlineTicketAndFlightInfos.stream().map(AirlineTicketAndFlightInfo::getCharge).collect(Collectors.toList());
         Integer tax = airlineTicketAndFlightInfos.stream().map(AirlineTicketAndFlightInfo::getTax).findFirst().get();
