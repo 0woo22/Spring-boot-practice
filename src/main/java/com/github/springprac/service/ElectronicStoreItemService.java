@@ -9,6 +9,10 @@ import com.github.springprac.web.dto.BuyOrder;
 import com.github.springprac.web.dto.Item;
 import com.github.springprac.web.dto.ItemBody;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ElectronicStoreItemService {
+
+
     private final ElectronicStoreItemRepository electronicStoreItemRepository;
     private final StoreSalesRepository storeSalesRepository;
 
@@ -94,7 +100,11 @@ public class ElectronicStoreItemService {
         // Item 재고 감소
         electronicStoreItemRepository.updateItemStock(itemId, itemEntity.getStock() - successBuyItemNums);
 
-        if (successBuyItemNums == 4) throw new RuntimeException("4개를 구매하는건 허락하지않습니다.");
+        if (successBuyItemNums == 4)
+        {
+            log.error("4개를 구매하는건 허락하지않습니다.");
+            throw new RuntimeException("4개를 구매하는건 허락하지않습니다.");
+        }
 
         // 매장 매상 추가
         StoreSales storeSales = storeSalesRepository.findStoreSalesById(itemEntity.getStoreId());

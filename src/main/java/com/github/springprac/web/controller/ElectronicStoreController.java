@@ -5,6 +5,8 @@ import com.github.springprac.web.dto.BuyOrder;
 import com.github.springprac.web.dto.Item;
 import com.github.springprac.web.dto.ItemBody;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,11 +16,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ElectronicStoreController {
 
+
+
+    private  final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private final ElectronicStoreItemService electronicStoreItemService;
 
 
     @GetMapping("/items")
     public List<Item> findAllItem() {
+        logger.info("GET /items 요청이 들어왔습니다. ");
+        List<Item> items = electronicStoreItemService.findAllItem();
+        logger.info("GET /items 응답 : " + items);
         return electronicStoreItemService.findAllItem();
     }
 
@@ -40,6 +49,9 @@ public class ElectronicStoreController {
 
     @GetMapping("/items-queries")
     public List<Item> findItemByQueryIds(@RequestParam("id") List<String> ids) {
+        logger.info("/items-queries 요청 ids: " + ids);
+        List<Item> items = electronicStoreItemService.findItemsByIds(ids);
+        logger.info("/items-queries 응답: " + items);
         return electronicStoreItemService.findItemsByIds(ids);
     }
 

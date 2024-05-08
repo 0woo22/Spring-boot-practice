@@ -2,10 +2,7 @@ package com.github.springprac.web.dto;
 
 
 import com.github.springprac.respository.items.ItemEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Objects;
 
@@ -13,6 +10,7 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Item {
     private String id;
     private String name;
