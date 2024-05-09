@@ -36,4 +36,12 @@ public class AirReservationController {
         return airReservationService.makeReservation(reservationRequest);
 
     }
+
+    @GetMapping("/users-sum-price")
+    public Double findUserFlightSumPrice(
+            @RequestParam("user-id")Integer userId
+    ){
+        Double sum = airReservationService.findUserFlightSumPrice(userId);
+        return sum;
+    }
 }

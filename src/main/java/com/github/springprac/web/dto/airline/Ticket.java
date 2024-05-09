@@ -7,12 +7,14 @@ import com.github.springprac.respository.airlineTicket.AirlineTicket;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class) // 티켓정보에서 return_time 이기 때문에 _ 사용위해 해줌
 public class Ticket {
     private String depart;

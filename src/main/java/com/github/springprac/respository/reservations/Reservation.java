@@ -1,59 +1,45 @@
 package com.github.springprac.respository.reservations;
 
-import java.time.LocalDateTime;
+import com.github.springprac.respository.airlineTicket.AirlineTicket;
+import com.github.springprac.respository.passenger.Passenger;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.Hibernate;
 
+
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "reservation")
 public class Reservation {
+    @Id @Column(name = "reservation_id") @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer reservationId;
-    private Integer passengerId;
-    private Integer airlineTicketId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "passenger_id")
+    private Passenger passenger;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "airline_ticket_id")
+    private AirlineTicket airlineTicket;
+
+    @Column(name = "reservation_status", length = 10)
     private String reservationStatus;
+
+    @Column(name = "reserve_at")
     private LocalDateTime reserveAt;
 
-    public Reservation(Integer passengerId, Integer airlineTicketId) {
-        this.passengerId = passengerId;
-        this.airlineTicketId = airlineTicketId;
+    public Reservation(Passenger passenger, AirlineTicket airlineTicket) {
+        this.passenger = passenger;
+        this.airlineTicket = airlineTicket;
         this.reservationStatus = "대기";
         this.reserveAt = LocalDateTime.now();
-    }
-
-    public Integer getReservationId() {
-        return reservationId;
-    }
-
-    public void setReservationId(Integer reservationId) {
-        this.reservationId = reservationId;
-    }
-
-    public Integer getPassengerId() {
-        return passengerId;
-    }
-
-    public void setPassengerId(Integer passengerId) {
-        this.passengerId = passengerId;
-    }
-
-    public Integer getAirlineTicketId() {
-        return airlineTicketId;
-    }
-
-    public void setAirlineTicketId(Integer airlineTicketId) {
-        this.airlineTicketId = airlineTicketId;
-    }
-
-    public String getReservationStatus() {
-        return reservationStatus;
-    }
-
-    public void setReservationStatus(String reservationStatus) {
-        this.reservationStatus = reservationStatus;
-    }
-
-    public LocalDateTime getReserveAt() {
-        return reserveAt;
-    }
-
-    public void setReserveAt(LocalDateTime reserveAt) {
-        this.reserveAt = reserveAt;
     }
 
     @Override
@@ -61,17 +47,15 @@ public class Reservation {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Reservation)) {
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-
         Reservation that = (Reservation) o;
-
-        return reservationId.equals(that.reservationId);
+        return reservationId != null && Objects.equals(reservationId, that.reservationId);
     }
 
     @Override
     public int hashCode() {
-        return reservationId.hashCode();
+        return getClass().hashCode();
     }
 }

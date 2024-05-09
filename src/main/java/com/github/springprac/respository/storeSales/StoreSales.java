@@ -1,7 +1,10 @@
 package com.github.springprac.respository.storeSales;
 
+import com.github.springprac.respository.items.ItemEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,4 +27,7 @@ public class StoreSales {
 
     @Column(name = "amount", nullable = false, columnDefinition = "DEFAULT 0 CHECK(amount) >= 0")
     private Integer amount;
+
+    @OneToMany(mappedBy = "storeSales" , fetch = FetchType.EAGER)
+    private List<ItemEntity> itemEntities;
 }

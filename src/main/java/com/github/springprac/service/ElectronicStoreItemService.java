@@ -12,6 +12,7 @@ import com.github.springprac.service.mapper.ItemMapper;
 import com.github.springprac.web.dto.BuyOrder;
 import com.github.springprac.web.dto.Item;
 import com.github.springprac.web.dto.ItemBody;
+import com.github.springprac.web.dto.StoreInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.ILoggerFactory;
@@ -31,8 +32,8 @@ import java.util.stream.Collectors;
 public class ElectronicStoreItemService {
 
     private final ElectroniceStoreItemJpaRepository electroniceStoreItemJpaRepository;
-    private final ElectronicStoreItemRepository electronicStoreItemRepository;
-    private final StoreSalesRepository storeSalesRepository;
+//    private final ElectronicStoreItemRepository electronicStoreItemRepository;
+//    private final StoreSalesRepository storeSalesRepository;
     private final StoreSalesJpaRepository storeSalesJpaRepository;
 
 
@@ -101,7 +102,8 @@ public class ElectronicStoreItemService {
         ItemEntity itemEntity = electroniceStoreItemJpaRepository.findById(itemId)
                 .orElseThrow(()->new NotFoundException("해당 이름의 물건을 찾을 수 없습니다."));
 
-        if (itemEntity.getStoreId() == null ) throw new RuntimeException("매장을 찾을 수 없습니다.");
+        log.info("============동작 확인 로그 1============");
+        if (itemEntity.getStoreSales().isEmpty()) throw new RuntimeException("매장을 찾을 수 없습니다.");
         if (itemEntity.getStock() <= 0) throw new RuntimeException("상품의 재고가 없습니다.");
 
         Integer successBuyItemNums;
@@ -118,11 +120,12 @@ public class ElectronicStoreItemService {
             log.error("4개를 구매하는건 허락하지않습니다.");
             throw new RuntimeException("4개를 구매하는건 허락하지않습니다.");
         }
+        log.info("============동작 확인 로그 2============");
 
         // 매장 매상 추가
-        StoreSales storeSales = storeSalesJpaRepository.findById(itemEntity.getStoreId())
-                        .orElseThrow(() -> new NotFoundException("요청하신 StoreId : " + itemEntity.getStoreId() + "에 해당하는 StoreSale 없습니다."));
-        storeSales.setAmount(storeSales.getAmount() + totalPrice);
+        StoreSales storeSales = itemEntity.getStoreSales() // 내부적으로 StoreSales를 가져옴 그리고 실제 객체에 매핑시킴 .
+                        .orElseThrow(() -> new NotFoundException("요청하신 Store에 해당하는 StoreSale 없습니다."));
+        storeSales.setAmount(storeSales.getAmount() + totalPrice); // 그 이후에 setter해서 return
         return successBuyItemNums;
     }
 
@@ -144,5 +147,12 @@ public class ElectronicStoreItemService {
     public Page<Item> findAllWithPageable(List<String> types, Pageable pageable) {
         Page<ItemEntity> itemEntities = electroniceStoreItemJpaRepository.findAllByTypeIn(types, pageable);
         return itemEntities.map(ItemMapper.INSTANCE::itemEntityToItem);
+    }
+
+    @Transactional(transactionManager = "tmJpa1")
+    public List<StoreInfo> findAllStoreInfo() {
+        List<StoreSales> storeSales = storeSalesJpaRepository.findAll();
+        List<StoreInfo> storeInfos = storeSales.stream().map(StoreInfo::new).collect(Collectors.toList());
+        return storeInfos;
     }
 }

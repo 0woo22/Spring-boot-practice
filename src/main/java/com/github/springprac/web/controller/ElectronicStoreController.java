@@ -1,9 +1,12 @@
 package com.github.springprac.web.controller;
 
+import com.github.springprac.respository.storeSales.StoreSales;
+import com.github.springprac.respository.storeSales.StoreSalesJpaRepository;
 import com.github.springprac.service.ElectronicStoreItemService;
 import com.github.springprac.web.dto.BuyOrder;
 import com.github.springprac.web.dto.Item;
 import com.github.springprac.web.dto.ItemBody;
+import com.github.springprac.web.dto.StoreInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -12,7 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -21,6 +27,7 @@ import java.util.List;
 public class ElectronicStoreController {
 
     private final ElectronicStoreItemService electronicStoreItemService;
+    private final StoreSalesJpaRepository storeSalesJpaRepository;
 
     @GetMapping("/items")
     public List<Item> findAllItem(){
@@ -94,6 +101,14 @@ public class ElectronicStoreController {
     @GetMapping("/items-types-page")
     public Page<Item> findItemsPagination(@RequestParam("type")List<String> types, Pageable pageable){
         return electronicStoreItemService.findAllWithPageable(types, pageable);
+    }
+
+    @GetMapping("/stores")
+    public List<StoreInfo> findAllStoreInfo(){
+        List<StoreSales> storeSales = storeSalesJpaRepository.findAllFetchJoin();
+        log.info("=====================N+1확인용 로그========================");
+        List<StoreInfo> storeInfos = storeSales.stream().map(StoreInfo::new).collect(Collectors.toList());
+        return storeInfos;
     }
 
 }

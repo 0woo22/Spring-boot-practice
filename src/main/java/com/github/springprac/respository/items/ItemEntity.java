@@ -3,9 +3,12 @@ package com.github.springprac.respository.items;
 // db 테이블과 1대 1 매핑되는 클래스
 
 
+import com.github.springprac.respository.storeSales.StoreSales;
 import com.github.springprac.web.dto.ItemBody;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -29,8 +32,10 @@ public class ItemEntity {
 
     @Column(name ="price")
     private Integer price;
-    @Column(name = "store_id")
-    private Integer storeId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id")
+    private StoreSales storeSales;
 
     @Column(name = "stock", columnDefinition = "DEFAULT 0 CHECK(stock) >= 0")
     private Integer stock;
@@ -45,12 +50,15 @@ public class ItemEntity {
         this.name = name;
         this.type = type;
         this.price = price;
-        this.storeId = null;
+        this.storeSales = null;
         this.stock = 0;
         this.cpu = cpu;
         this.capacity = capacity;
     }
 
+    public Optional<StoreSales> getStoreSales() {
+        return Optional.ofNullable(storeSales);
+    }
 
     public void setItemBody(ItemBody itemBody) {
         this.name = itemBody.getName();
