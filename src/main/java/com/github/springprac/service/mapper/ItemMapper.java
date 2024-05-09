@@ -3,6 +3,7 @@ package com.github.springprac.service.mapper;
 
 import com.github.springprac.respository.items.ItemEntity;
 import com.github.springprac.web.dto.Item;
+import com.github.springprac.web.dto.ItemBody;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -14,8 +15,13 @@ public interface ItemMapper {
     ItemMapper INSTANCE = Mappers.getMapper(ItemMapper.class);
 
     // 메소드
-    @Mapping(target = "spec.cpu",source = "cpu")
-    @Mapping(target = "spec.capacity",source = "capacity")
+    @Mapping(target = "spec.cpu", source = "cpu")
+    @Mapping(target = "spec.capacity", source = "capacity")
     Item itemEntityToItem(ItemEntity itemEntity);
 
+    @Mapping(target = "cpu", source = "itemBody.spec.cpu")
+    @Mapping(target = "capacity", source = "itemBody.spec.capacity")
+    @Mapping(target = "storeId", ignore = true)
+    @Mapping(target = "stock", expression = "java(0)")
+    ItemEntity idAndItemBodyToItemEntity(Integer id, ItemBody itemBody);
 }

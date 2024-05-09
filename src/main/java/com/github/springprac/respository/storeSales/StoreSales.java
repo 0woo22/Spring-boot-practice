@@ -1,17 +1,27 @@
 package com.github.springprac.respository.storeSales;
 
-
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @ToString
 @Builder
-public class StoreSales {
-    private Integer id;
-    private String storeName;
-    private Integer amount;
+@Entity
+@Table(name = "store_sales")
 
+public class StoreSales {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    @Column(name = "store_name", length = 30)
+    private String storeName;
+
+    @Column(name = "amount", nullable = false, columnDefinition = "DEFAULT 0 CHECK(amount) >= 0")
+    private Integer amount;
 }
