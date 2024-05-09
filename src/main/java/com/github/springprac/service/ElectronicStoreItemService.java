@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,11 +33,11 @@ import java.util.stream.Collectors;
 public class ElectronicStoreItemService {
 
     private final ElectroniceStoreItemJpaRepository electroniceStoreItemJpaRepository;
-//    private final ElectronicStoreItemRepository electronicStoreItemRepository;
-//    private final StoreSalesRepository storeSalesRepository;
     private final StoreSalesJpaRepository storeSalesJpaRepository;
 
 
+
+    @Cacheable(value = "items", key = "#root.methodName")
     public List<Item> findAllItem() {
         List<ItemEntity> itemEntities = electroniceStoreItemJpaRepository.findAll();
         return itemEntities.stream().map(ItemMapper.INSTANCE::itemEntityToItem).collect(Collectors.toList());
@@ -53,6 +54,8 @@ public class ElectronicStoreItemService {
         return itemEntityCreated.getId();
     }
 
+
+    @Cacheable(value = "items", key = "#id")
     public Item findItemById(String id) {
         Integer idInt = Integer.parseInt(id);
         ItemEntity itemEntity = electroniceStoreItemJpaRepository.findById(idInt).orElseThrow(() -> new NotFoundException("해당 ID: " + idInt + "의 Item을 찾을 수 없습니다."));
@@ -60,6 +63,8 @@ public class ElectronicStoreItemService {
         return item;
     }
 
+
+    @Cacheable(value = "items", key = "#ids")
     public List<Item> findItemsByIds(List<String> ids) {
         List<ItemEntity> itemEntities = electroniceStoreItemJpaRepository.findAll();
         if (itemEntities.isEmpty()) throw new NotFoundException("아무 Items 들을 찾을 수 없습니다.");

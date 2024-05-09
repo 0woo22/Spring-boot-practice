@@ -31,9 +31,9 @@ public class ElectronicStoreController {
 
     @GetMapping("/items")
     public List<Item> findAllItem(){
-        log.info("GET /items 요청이 들어왔습니다.");
+//        log.info("GET /items 요청이 들어왔습니다.");
         List<Item> items = electronicStoreItemService.findAllItem();
-        log.info("GET /items 응답: " + items);
+//        log.info("GET /items 응답: " + items);
         return items;
     }
 
